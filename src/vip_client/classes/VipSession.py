@@ -542,7 +542,7 @@ class VipSession(VipLauncher):
         3. Monitors pipeline executions until they are all over;
         4. Downloads execution results from VIP.
 
-        /!\ This method assumes that all session properties are already set.
+        |!| This method assumes that all session properties are already set.
         Optional arguments can still be provided:
         - Set `update_files` to False to avoid checking the input data on VIP;
         - Increase `nb_runs` to run more than 1 execution at once;
@@ -1075,8 +1075,8 @@ class VipSession(VipLauncher):
             # Case: single input, string or path-like
             elif isinstance(input, (str, os.PathLike)):
                 # Case: VIP path
-                if str(input).startswith(self._SERVER_PATH_PREFIX): # PurePath.is_relative_to() is unavailable for Python <3.9
-                    if self._is_defined('_vip_input_dir'): 
+                if str(input).startswith(self._SERVER_PATH_PREFIX) and len(str(input)) > 0: # PurePath.is_relative_to() is unavailable for Python <3.9
+                    if self._is_defined('_vip_input_dir'):
                         input_dir = self._vip_input_dir
                         input_path = PurePosixPath(input)
                     else: # Return input if `_vip_input_dir` is unset
@@ -1091,8 +1091,10 @@ class VipSession(VipLauncher):
                         return input
                 # Return the part of `input_path` that is relative to `input_dir` (if relevant)
                 try: # No condition since PurePath.is_relative_to() is unavailable for Python <3.9
-                    return PurePosixPath( # Force Posix flavor to avoid conflicts with Windows paths when checking equality
-                        input_path.relative_to(input_dir)) # Relative part of `input_path`
+                    if len(str(input)) > 0:
+                        return PurePosixPath( # Force Posix flavor to avoid conflicts with Windows paths when checking equality
+                            input_path.relative_to(input_dir)) # Relative part of `input_path`
+                    return input
                 except ValueError:
                     # This is the case when no relative part could be found
                     return input

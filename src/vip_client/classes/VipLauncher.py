@@ -146,14 +146,10 @@ class VipLauncher():
         # Check type
         if not isinstance(input_settings, dict):
             raise TypeError("`input_settings` should be a dictionary")
-        # Check if each input can be converted to a string with valid characters for VIP
-        for param, value in input_settings.items():
-            invalid = self._invalid_chars_for_vip(value)
-            # if not (set(invalid) <= {'\\'}): # '\\' is OK for Windows paths #EDIT: Corrected in _invalid_chars_for_vip
-            if invalid:
-                raise ValueError(
-                    f"Parameter '{param}' contains some invalid character(s): {', '.join(invalid)}"
-                )
+        
+        # Check if each input can be converted to a string with valid characters and no empty strings
+        self._get_invalid_input(input_settings)
+        
         # Parse the input settings
         new_settings = self._parse_input_settings(input_settings)
         self._print("parsed")
@@ -489,10 +485,7 @@ class VipLauncher():
             self._print("OK")
         # Check the input parameters
         self._print("Input settings: ", end="", flush=True)
-            # Check existence
-        if not self._is_defined("_input_settings"):
-            raise TypeError("Please provide input parameters for Session: %s" %self._session_name)  
-            # Check content
+        # Check content
         self._check_input_settings(location=self._SERVER_NAME)
         self._print("OK")
         # End parameters checks
@@ -602,7 +595,7 @@ class VipLauncher():
         1. Launches pipeline executions on VIP;
         2. Monitors pipeline executions until they are all over.
 
-        /!\ This function assumes that all session properties are already set.
+        |!| This function assumes that all session properties are already set.
         Optional arguments can be provided:
         - Increase `nb_runs` to run more than 1 execution at once;
         - Set `refresh_time` to modify the default refresh time;
@@ -1562,7 +1555,7 @@ class VipLauncher():
             if self._is_defined("_input_settings"):
                 input_settings = self._get_input_settings(location)
             else:
-                raise AttributeError("Input settings are missing")
+                input_settings = {}
         # Check the pipeline identifier
         if not self._is_defined("_pipeline_id"): 
             raise AttributeError("Input settings could not be checked without a pipeline identifier.")
@@ -1584,14 +1577,14 @@ class VipLauncher():
             # required parameters without a default value
             {
                 param["name"] for param in self._pipeline_def['parameters'] 
-                if not param["isOptional"] and (param["defaultValue"] == '$input.getDefaultValue()')
+                if not param["isOptional"] and param["defaultValue"] == None
             } 
             # current parameters
             - set(input_settings.keys()) 
         )
         # Raise an error if a field is missing
         if missing_fields:
-            raise TypeError("Missing input parameter(s) :\n" + ", ".join(missing_fields))
+            raise AttributeError("Missing input parameter(s): " + ", ".join(sorted(missing_fields)))
         # Check every input parameter is a valid field
         unknown_fields = (
             set(input_settings.keys()) # current parameters
@@ -1603,6 +1596,40 @@ class VipLauncher():
              + f"'] are useless for pipeline '{self._pipeline_id}'. This may throw RuntimeError later.")
     # ------------------------------------------------
     
+    
+    def _get_invalid_input(self, input_settings: dict, parameters_ref=None):
+        missing_inputs = []
+        invalid_chars_inputs = []
+        if not parameters_ref: # Check from itself if no parameters_ref provided
+            parameters_ref = [{"name": param} for param in input_settings.keys()]
+        for param in parameters_ref:
+            # Get parameter name
+            name = param['name']
+            # Skip irrelevant inputs (this should not happen after self._check_input_keys())
+            if name not in input_settings:
+                continue
+            # Get input value
+            value = input_settings[name]
+            
+            # Check the input has no empty values
+            if not self._is_input_full(value):
+                missing_inputs.append(name)
+                continue
+            # Check invalid characters for VIP
+            invalid = self._invalid_chars_for_vip(value)
+            if invalid:
+                invalid_chars_inputs.append((name, invalid))
+                continue
+                
+        if missing_inputs:
+            raise ValueError(
+                f"Missing input value(s) for parameter(s): {', '.join(sorted(missing_inputs))}"
+            )
+        if invalid_chars_inputs:
+            raise ValueError(
+                f"Invalid character(s) in input value(s) for parameter(s): {', '.join(sorted(invalid_chars_inputs))}"
+            )
+    
     # Check the parameter values according to pipeline descriptor
     def _check_input_values(self, input_settings: dict, location: str) -> None:
         """
@@ -1611,42 +1638,32 @@ class VipLauncher():
 
         Prerequisite: input_settings is defined and contains only strings, or lists of strings.
         """
-        # Browse the input parameters
-        for param in self._pipeline_def['parameters'] :
-            # Get parameter name
+        self._get_invalid_input(input_settings, self._pipeline_def['parameters'])
+
+        wrong_type_inputs = []
+        for param in self._pipeline_def['parameters']:
             name = param['name']
-            # Skip irrelevant inputs (this should not happen after self._check_input_keys())
-            if name not in input_settings:
-                continue
-            # Get input value
-            value = input_settings[name]
-            # `request` will send only strings
-            if not self._isinstance(value, str): # This should not happen
-                raise ValueError( # Parameter could not be parsed correctly
-                    f"Parameter: '{name}' \n\twith value: '{value}' \n\twith type: '{type(value)}')\ncould not be parsed."\
-                        +"Please double check the value; if correct, try converting it to `str` in the `input_settings`."
-                )
-            # Check the input has no empty values
-            if not self._is_input_full(value):
-                raise ValueError(
-                    f"Parameter '{name}' contains an empty value"
-                )
-            # Check invalid characters for VIP
-            invalid = self._invalid_chars_for_vip(value)
-            if invalid:
-                raise ValueError(
-                    f"Parameter '{name}' contains some invalid character(s): {', '.join(invalid)}"
-                )
-            # If input is a File, check file(s) existence 
+            value = input_settings.get(name)
+            # If input is a File, check file(s) existence
             if param["type"] == "File":
                 # Ensure every file exists at `location`
                 missing_file = self._first_missing_file(value, location)
                 if missing_file:
                     raise FileNotFoundError(
-                        f"Parameter '{name}': The following file is missing in the {location.upper()} file system:\n\t{missing_file}"
+                        f"Parameter '{name}': The following file is missing in the {location.upper()} file system: {missing_file}"
                     )
+            if param["type"] == "Boolean":
+                if value not in ["true", "false"]:
+                    wrong_type_inputs.append(name)
+                    continue
             # Check other input formats ?
             else: pass # TODO
+
+        if wrong_type_inputs:
+            raise ValueError(
+                f"Wrong type(s) for parameter(s): {', '.join(sorted(wrong_type_inputs))}"
+            )
+        
     # ------------------------------------------------
     
     # Function to look for empty values
@@ -1655,12 +1672,10 @@ class VipLauncher():
         """
         Returns False if `value` contains an empty string or list.
         """
-        if isinstance(value, list) and cls._isinstance(value, str): # Case: list of strings
-            return all([(len(v) > 0) for v in value])
-        elif isinstance(value, (str, list)): # Case: list or string
-            return (len(value) > 0)
-        else: # Case: other
-            return True
+        if isinstance(value, list): # Case: list
+            return len(value) > 0 and all([cls._is_input_full(v) for v in value])
+        else:
+            return (len(str(value)) > 0)
     # ------------------------------------------------
 
     # Function to assert the input contains only a certain Python type
