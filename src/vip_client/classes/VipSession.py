@@ -1075,7 +1075,7 @@ class VipSession(VipLauncher):
             # Case: single input, string or path-like
             elif isinstance(input, (str, os.PathLike)):
                 # Case: VIP path
-                if str(input).startswith(self._SERVER_PATH_PREFIX) and len(str(input)) > 0: # PurePath.is_relative_to() is unavailable for Python <3.9
+                if str(input).startswith(self._SERVER_PATH_PREFIX): # PurePath.is_relative_to() is unavailable for Python <3.9
                     if self._is_defined('_vip_input_dir'):
                         input_dir = self._vip_input_dir
                         input_path = PurePosixPath(input)

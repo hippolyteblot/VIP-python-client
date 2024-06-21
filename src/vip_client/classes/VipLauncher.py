@@ -1555,7 +1555,7 @@ class VipLauncher():
             if self._is_defined("_input_settings"):
                 input_settings = self._get_input_settings(location)
             else:
-                input_settings = {}
+                raise AttributeError("Input settings have not been defined.")
         # Check the pipeline identifier
         if not self._is_defined("_pipeline_id"): 
             raise AttributeError("Input settings could not be checked without a pipeline identifier.")
