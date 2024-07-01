@@ -20,9 +20,9 @@ def setup_teardown_vip_launcher():
         raise Exception("Error creating directory")
     counter = 0
     while not exists(BASE_PATH_VIP):
-        time.sleep(5)
-        if counter > 24:
-            raise Exception("Directory not created after 120 seconds")
+        time.sleep(1)
+        if counter > 100:
+            raise Exception("Directory not created after delay")
         counter += 1
     yield
     assert delete_path(BASE_PATH_VIP)
@@ -54,16 +54,16 @@ def test_kill_exec():
     exec_id = init_exec('Fake_app_test_delay/0.1', resultsLocation=BASE_PATH_VIP, inputValues=input_values, name='test_kill_exec')
     counter = 0
     while execution_info(exec_id)['status'] != 'Running':
-        time.sleep(5)
-        if counter > 12:
-            raise Exception("Execution not started after 60 seconds")
+        time.sleep(1)
+        if counter > 100:
+            raise Exception("Execution not ended after delay")
         counter += 1
     assert kill_execution(exec_id, deleteFiles=True)
     counter = 0
     while execution_info(exec_id)['status'] != 'Killed':
-        time.sleep(5)
-        if counter > 12:
-            raise Exception("Execution not killed after 60 seconds")
+        time.sleep(1)
+        if counter > 100:
+            raise Exception("Execution not ended after delay")
 
 def test_get_exec_stdout():
     input_values = {
@@ -73,9 +73,9 @@ def test_get_exec_stdout():
     exec_id = init_exec('Fake_app_test/0.1', resultsLocation=BASE_PATH_VIP, inputValues=input_values, name='test_get_exec_stdout')
     counter = 0
     while execution_info(exec_id)['status'] != 'Finished':
-        time.sleep(5)
-        if counter > 12:
-            raise Exception("Execution not ended after 60 seconds")
+        time.sleep(1)
+        if counter > 100:
+            raise Exception("Execution not ended after delay")
         counter += 1
     stdout = get_exec_stdout(exec_id)
     assert isinstance(stdout, str)
@@ -89,9 +89,9 @@ def test_get_exec_results():
     exec_id = init_exec('Fake_app_test/0.1', resultsLocation=BASE_PATH_VIP, inputValues=input_values, name='test_get_exec_results')
     counter = 0
     while execution_info(exec_id)['status'] != 'Finished':
-        time.sleep(5)
-        if counter > 12:
-            raise Exception("Execution not ended after 60 seconds")
+        time.sleep(1)
+        if counter > 100:
+            raise Exception("Execution not ended after delay")
         counter += 1
     results = get_exec_results(exec_id)
     # assert that this is a list of dictionaries

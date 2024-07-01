@@ -74,7 +74,10 @@ def mock_vip_api(mocker, pipeline_id):
     def fake_list_elements(self):
         return [{'name': 'element1', 'path': 'path1'}, {'name': 'element2', 'path': 'path2'}]
     
-    mocker.patch("vip_client.utils.vip.exists").return_value = True
+    def fake_exists(path):
+        return False
+    
+    #mocker.patch("vip_client.utils.vip.exists", side_effect = fake_exists)
     mocker.patch("vip_client.utils.vip.upload").return_value = True
     mocker.patch("vip_client.utils.vip.download").return_value = True
     mocker.patch("vip_client.utils.vip.pipeline_def").side_effect = fake_pipeline_def

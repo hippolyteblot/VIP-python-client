@@ -62,7 +62,7 @@ def test_run_and_finish(mocker, nb_runs, pipeline_id):
     removed = False
 
     def fake_exists(path):
-        if path == '/vip/Home/test-VipLauncher/OUTPUTS':
+        if path == '/vip/Home/test-VipLauncher/OUTPUTS' and not removed:
             return True
         if path == 'fake_value' and not removed:
             return True
@@ -96,7 +96,7 @@ def test_run_and_finish(mocker, nb_runs, pipeline_id):
         assert s.workflows[wid]["status"] == "Finished"
     assert s.pipeline_id == pipeline_id
     # Finish the Session
-    s.finish(timeout=50)
+    s.finish(timeout=1)
     # Check Deletion
     assert removed
     for wid in s.workflows:
@@ -131,13 +131,26 @@ def test_run_and_finish(mocker, nb_runs, pipeline_id):
 def test_backup(mocker, backup_location, input_settings, pipeline_id, output_dir):
         
     removed = False
-
+    removed2 = False
+    access_counter = 3
+    
     def fake_exists(path):
-        if path == '/vip/Home/test-VipLauncher/OUTPUTS':
+        nonlocal access_counter
+        if path == '/vip/Home/test-VipLauncher/OUTPUTS/session_data.json':
+            if access_counter > 0:
+                access_counter -= 1
+                return False
+            else:
+                return True
+        nonlocal removed2
+        if path == '/vip/Home/test-VipLauncher/OUTPUTS' and not removed:
             return True
+        if path == "/vip/Home/test-VipLauncher/OUTPUTS/session_data.json" and not removed2:
+            removed2 = True
+            return False
         if path == 'fake_value' and not removed:
             return True
-        return False
+        return True
     
     def fake_delete_path(path):
         nonlocal removed
@@ -176,6 +189,8 @@ def test_backup(mocker, backup_location, input_settings, pipeline_id, output_dir
 
 def test_properties_interface(mocker):
 
+    mocker.patch("vip_client.utils.vip.exists").return_value = True
+    
     VipLauncher._BACKUP_LOCATION = "vip"
 
     # Copy the first session

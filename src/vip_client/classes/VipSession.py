@@ -583,7 +583,7 @@ class VipSession(VipLauncher):
             self._print( "    Please run finish() from the original session or remove them manually on the VIP portal:")
             self._print(f"\t{self._VIP_PORTAL}")
         # Save the session
-        self._save()    
+        self._save()
         # Return
         return self
     # ------------------------------------------------
