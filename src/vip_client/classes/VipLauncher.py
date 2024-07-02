@@ -148,7 +148,7 @@ class VipLauncher():
             raise TypeError("`input_settings` should be a dictionary")
         
         # Check if each input can be converted to a string with valid characters and no empty strings
-        self._get_invalid_input(input_settings)
+        self._check_invalid_input(input_settings)
         
         # Parse the input settings
         new_settings = self._parse_input_settings(input_settings)
@@ -1597,7 +1597,7 @@ class VipLauncher():
     # ------------------------------------------------
     
     
-    def _get_invalid_input(self, input_settings: dict, parameters_ref=None):
+    def _check_invalid_input(self, input_settings: dict, parameters_ref=None):
         missing_inputs = []
         invalid_chars_inputs = []
         if not parameters_ref: # Check from itself if no parameters_ref provided
@@ -1638,7 +1638,7 @@ class VipLauncher():
 
         Prerequisite: input_settings is defined and contains only strings, or lists of strings.
         """
-        self._get_invalid_input(input_settings, self._pipeline_def['parameters'])
+        self._check_invalid_input(input_settings, self._pipeline_def['parameters'])
 
         wrong_type_inputs = []
         for param in self._pipeline_def['parameters']:
