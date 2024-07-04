@@ -30,5 +30,4 @@ jobs:
 
     - name: Run Pytest
       run: |
-        export PYTHONPATH=src:$PYTHONPATH
         pytest
