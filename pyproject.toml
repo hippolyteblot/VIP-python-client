@@ -36,6 +36,11 @@ packages = ["src/vip_client"]
 [tool.hatch.version]
 path = "src/vip_client/__init__.py" 
 
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]
+
 [project.urls]
 Homepage = "https://vip.creatis.insa-lyon.fr"
 Source = "https://github.com/virtual-imaging-platform/VIP-python-client"

@@ -4,8 +4,8 @@ import pytest
 from pathlib import *
 
 import pytest_mock
-from src.vip_client.utils import vip
-from src.vip_client.classes import VipSession
+from vip_client.utils import vip
+from vip_client.classes import VipSession
 from mocked_services import mock_vip_api, mock_pathlib, mock_os
 
 def get_properties(obj) -> dict:

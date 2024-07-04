@@ -2,8 +2,8 @@ import io
 import pytest
 from pathlib import *
 
-from src.vip_client.utils import vip
-from src.vip_client.classes import VipLauncher
+from vip_client.utils import vip
+from vip_client.classes import VipLauncher
 from mocked_services import mock_vip_api, mock_pathlib, mock_os
 
 
