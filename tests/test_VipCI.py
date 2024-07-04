@@ -4,8 +4,8 @@ import pytest
 from pathlib import *
 
 import pytest_mock
-from src.vip_client.utils import vip
-from src.vip_client.classes import VipCI
+from vip_client.utils import vip
+from vip_client.classes import VipCI
 from mocked_services import mock_vip_api, mock_girder_client, mock_pathlib, mock_os
 from FakeGirderClient import FakeGirderClient
 

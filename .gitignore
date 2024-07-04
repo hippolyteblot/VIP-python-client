@@ -8,4 +8,4 @@ examples/old
 publish.sh
 dist/
 .env
-test_pipedef.py
+atest_pipedef.py

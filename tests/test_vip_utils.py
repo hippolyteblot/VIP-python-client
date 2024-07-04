@@ -2,7 +2,7 @@ import pytest
 import time
 import os
 
-from src.vip_client.utils.vip import *
+from vip_client.utils.vip import *
 
 BASE_PATH_VIP = '/vip/Home/API/client_tests/'
 BASE_PATH_LOCAL = 'tests/data/'
