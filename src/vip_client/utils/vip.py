@@ -312,6 +312,20 @@ def list_executions()->list:
     return rq.json()
 
 # -----------------------------------------------------------------------------
+def list_examples()->list:
+    url = __PREFIX + "executions/examples"
+    rq = SESSION.get(url, headers=__headers)
+    manage_errors(rq)
+    return rq.json()
+
+# -----------------------------------------------------------------------------
+def example_info(id_exec)->dict:
+    url = __PREFIX + "executions/examples/" + id_exec
+    rq = SESSION.get(url, headers=__headers)
+    manage_errors(rq)
+    return rq.json()
+
+# -----------------------------------------------------------------------------
 def count_executions()->int:
     url = __PREFIX + 'executions/count'
     rq = SESSION.get(url, headers=__headers)
