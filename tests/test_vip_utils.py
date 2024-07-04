@@ -27,6 +27,7 @@ def setup_teardown_vip_launcher():
     yield
     assert delete_path(BASE_PATH_VIP)
 
+@pytest.mark.slow
 def test_upload_download():
     assert upload(BASE_PATH_LOCAL + 'file.txt', BASE_PATH_VIP + 'file.txt')
     assert exists(BASE_PATH_VIP + 'file.txt')
@@ -34,7 +35,7 @@ def test_upload_download():
     assert compare_files(BASE_PATH_LOCAL + 'file.txt', BASE_PATH_LOCAL + 'file_copy.txt')
     assert delete_path(BASE_PATH_VIP + 'file.txt')
 
-
+@pytest.mark.slow
 def test_init_exec():
     input_values = {
         'mand_text': 'value1',
@@ -44,7 +45,7 @@ def test_init_exec():
     exec_info = execution_info(exec_id)
     assert exec_info['status'] == 'Running'
 
-
+@pytest.mark.slow
 def test_kill_exec():
     input_values = {
         'mand_text': 'value1',
@@ -65,6 +66,7 @@ def test_kill_exec():
         if counter > 100:
             raise Exception("Execution not ended after delay")
 
+@pytest.mark.slow
 def test_get_exec_stdout():
     input_values = {
         'mand_text': 'value1',
@@ -80,7 +82,7 @@ def test_get_exec_stdout():
     stdout = get_exec_stdout(exec_id)
     assert isinstance(stdout, str)
     
-
+@pytest.mark.slow
 def test_get_exec_results():
     input_values = {
         'mand_text': 'value1',
@@ -101,7 +103,7 @@ def test_get_exec_results():
         assert 'executionId' in r
         assert 'path' in r
     
-
+@pytest.mark.slow
 def test_list_pipeline():
     pipelines = list_pipeline()
     # assert that this is a list of dictionaries
@@ -115,7 +117,7 @@ def test_list_pipeline():
         assert 'canExecute' in p
         assert 'description' in p
 
-
+@pytest.mark.slow
 def test_pipeline_def():
     pipeline = pipeline_def('CQUEST/0.3')
     assert isinstance(pipeline, dict)
@@ -126,7 +128,7 @@ def test_pipeline_def():
     assert 'canExecute' in pipeline
     assert 'description' in pipeline
 
-
+@pytest.mark.slow
 def test_platform_info():
     info = platform_info()
     assert isinstance(info, dict)
