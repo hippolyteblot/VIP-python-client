@@ -1643,6 +1643,9 @@ class VipLauncher():
         wrong_type_inputs = []
         for param in self._pipeline_def['parameters']:
             name = param['name']
+            # Skip irrelevant inputs
+            if name not in input_settings:
+                continue
             value = input_settings.get(name)
             # If input is a File, check file(s) existence
             if param["type"] == "File":
