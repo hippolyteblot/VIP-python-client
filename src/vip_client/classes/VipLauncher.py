@@ -1605,7 +1605,7 @@ class VipLauncher():
         for param in parameters_ref:
             # Get parameter name
             name = param['name']
-            # Skip irrelevant inputs (this should not happen after self._check_input_keys())
+            # Check only defined inputs
             if name not in input_settings:
                 continue
             # Get input value
@@ -1643,7 +1643,7 @@ class VipLauncher():
         wrong_type_inputs = []
         for param in self._pipeline_def['parameters']:
             name = param['name']
-            # Skip irrelevant inputs
+            # Check only defined inputs
             if name not in input_settings:
                 continue
             value = input_settings.get(name)
