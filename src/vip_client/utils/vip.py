@@ -20,6 +20,11 @@ import requests
 # API URL
 __PREFIX = "https://vip.creatis.insa-lyon.fr/rest/"
 
+def set_vip_api_url(new_prefix: str) -> None:
+    """Change the API prefix"""
+    global __PREFIX
+    __PREFIX = new_prefix
+
 # API key
 __apikey = None
 __headers = {'apikey': __apikey}
