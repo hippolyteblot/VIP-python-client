@@ -51,13 +51,8 @@ class VipCI(VipLauncher):
     # Default backup location 
     # (set to None to avoid saving and loading backup files)
     _BACKUP_LOCATION = "girder"
-
-    # --- New Attributes ---
-
-    # Prefix that defines a Girder ID
-    _GIRDER_ID_PREFIX = "pilotGirder"
-    # Grider portal
-    _GIRDER_PORTAL = 'https://pilot-warehouse.creatis.insa-lyon.fr/api/v1'
+    
+    
 
                     #################
     ################ Main Properties ##################
@@ -137,7 +132,10 @@ class VipCI(VipLauncher):
 
     # Login to VIP and Girder
     @classmethod
-    def init(cls, vip_key="VIP_API_KEY", girder_key="GIRDER_API_KEY", verbose=True, **kwargs) -> VipCI:
+    def init(cls, vip_key="VIP_API_KEY", girder_key="GIRDER_API_KEY", verbose=True, 
+             girder_portal='https://pilot-warehouse.creatis.insa-lyon.fr/api/v1',
+             girder_id_prefix="pilotGirder",
+             **kwargs) -> VipCI:
         """
         Handshakes with VIP using your own API key. 
         Returns a class instance which properties can be provided as keyword arguments.
@@ -162,7 +160,9 @@ class VipCI(VipLauncher):
         # Restore the verbose state
         cls._VERBOSE = verbose
         # Instantiate a Girder client
-        cls._girder_client = girder_client.GirderClient(apiUrl=cls._GIRDER_PORTAL)
+        cls._girder_client = girder_client.GirderClient(apiUrl=girder_portal)
+        # Set the Girder ID prefix
+        cls._GIRDER_ID_PREFIX = girder_id_prefix
         # Check if `girder_key` is in a local file or environment variable
         true_key = cls._get_api_key(girder_key)
         # Authenticate with Girder API key
