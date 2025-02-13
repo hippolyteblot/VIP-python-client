@@ -371,7 +371,8 @@ class VipLauncher():
 
     # ($A.1) Login to VIP
     @classmethod
-    def init(cls, api_key="VIP_API_KEY", verbose=True, **kwargs) -> VipLauncher:
+    def init(cls, api_key="VIP_API_KEY", verbose=True, vip_portal_url=None,
+             **kwargs) -> VipLauncher:
         """
         Handshakes with VIP using your own API key. 
         Returns a class instance which properties can be provided as keyword arguments.
@@ -391,6 +392,8 @@ class VipLauncher():
         """
         # Set the default verbose mode for all sessions
         cls._VERBOSE = verbose
+        # Set the VIP portal URL
+        cls._VIP_PORTAL = vip_portal_url if vip_portal_url else cls._VIP_PORTAL
         # Check if `api_key` is in a local file or environment variable
         true_key = cls._get_api_key(api_key)
         # Set User API key
