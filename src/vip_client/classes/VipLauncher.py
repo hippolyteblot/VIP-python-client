@@ -49,7 +49,7 @@ class VipLauncher():
     # Default file name to save session properties 
     _SAVE_FILE = "session_data.json"
     # Vip portal
-    _VIP_PORTAL = "https://vip.creatis.insa-lyon.fr/"
+    _VIP_PORTAL = "https://vip.creatis.insa-lyon.fr/rest/"
     # Mail address for support
     _VIP_SUPPORT = "vip-support@creatis.insa-lyon.fr"
     # Regular expression for invalid characters (i.e. all except valid characters)
@@ -399,6 +399,7 @@ class VipLauncher():
         # Set User API key
         try:
             # setApiKey() may return False
+            vip.set_vip_api_url(cls._VIP_PORTAL)
             assert vip.setApiKey(true_key), \
                 f"(!) Unable to set the VIP API key: {true_key}.\nPlease check the key or retry later."
         except RuntimeError as vip_error:
