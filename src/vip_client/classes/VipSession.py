@@ -684,11 +684,12 @@ class VipSession(VipLauncher):
     def _exists(cls, path: PurePath, location="local") -> bool:
         """
         Checks existence of a distant (`location`="vip") or local (`location`="local") resource.
-        `path` can be a string or path-like object.
+        `path` can be a string or path-like object. If `location` is "local", empty folders are 
+        considered as non-existent.
         """
         # Check path existence in `location`
         if location=="local":
-            return os.path.exists(path)
+            return os.path.exists(path) and os.path.isdir(path) and os.listdir(path)
         else: 
             return super()._exists(path=path, location=location)
     # ------------------------------------------------
@@ -832,6 +833,8 @@ class VipSession(VipLauncher):
         for local_file in files_to_upload :
             nFile+=1
             # Get the file size (if possible)
+            if local_file.stat().st_size == 0:
+                raise ValueError(f"File {local_file} is empty.")
             try: size = f"{local_file.stat().st_size/(1<<20):,.1f}MB"
             except: size = "unknown size"
             # Display the current file

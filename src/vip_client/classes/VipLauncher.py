@@ -1645,6 +1645,7 @@ class VipLauncher():
         self._check_invalid_input(input_settings, self._pipeline_def['parameters'])
 
         wrong_type_inputs = []
+        missing_files = []
         for param in self._pipeline_def['parameters']:
             name = param['name']
             # Check only defined inputs
@@ -1654,11 +1655,10 @@ class VipLauncher():
             # If input is a File, check file(s) existence
             if param["type"] == "File":
                 # Ensure every file exists at `location`
-                missing_file = self._first_missing_file(value, location)
+                missing_file = self._missing_file(value, location)
                 if missing_file:
-                    raise FileNotFoundError(
-                        f"Parameter '{name}': The following file is missing in the {location.upper()} file system: {missing_file}"
-                    )
+                    missing_files.append(name)
+                    continue
             if param["type"] == "Boolean":
                 if value not in ["true", "false"]:
                     wrong_type_inputs.append(name)
@@ -1669,6 +1669,10 @@ class VipLauncher():
         if wrong_type_inputs:
             raise ValueError(
                 f"Wrong type(s) for parameter(s): {', '.join(sorted(wrong_type_inputs))}"
+            )
+        if missing_files:
+            raise FileNotFoundError(
+                f"Missing file(s) for parameter(s): {', '.join(sorted(missing_files))}"
             )
         
     # ------------------------------------------------
@@ -1717,21 +1721,21 @@ class VipLauncher():
     
     # Function to assert file existence in the input settings
     @classmethod
-    def _first_missing_file(cls, value, location: str) -> str: 
+    def _missing_file(cls, value, location: str) -> str: 
         """
-        Returns the path the first non-existent file in `value` (None by default).
+        Returns true if the file `value` does not exist at `location`.
         - `value` can contain a single file path or a list of paths.
         - `location` refers to the storage infrastructure (e.g., "vip") to feed in cls._exists().
         """
         # Case : list of files
         if isinstance(value, list):
-            for file in value : 
-                if cls._first_missing_file(value=file, location=location) is not None:
+            for file in value :
+                if not cls._exists(file, location=location):
                     return file
-            return None
-        # Case: single file
+        # Case : single file
         else:
-            return value if not cls._exists(path=value, location=location) else None 
+            if not cls._exists(value, location=location):
+                return value
     # ------------------------------------------------
 
     ########################################
